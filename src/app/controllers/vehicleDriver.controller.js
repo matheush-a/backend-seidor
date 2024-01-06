@@ -84,6 +84,10 @@ const VehicleDriverController = {
         return res.status(500).json({ error: `Foreign key constraint violation, driver with id ${driver_id} does not exist.` });
       }
 
+      if (error.message.includes('vehicle_driver_vehicle_id_fkey')) {
+        return res.status(500).json({ error: `Foreign key constraint violation, vehicle with id ${vehicle_id} does not exist.` });
+      }
+
       res.status(500).json({ error: 'Internal Server Error' });
     }
   },
