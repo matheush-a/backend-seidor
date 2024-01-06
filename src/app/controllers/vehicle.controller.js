@@ -2,7 +2,7 @@ const supabase = require('../database/supabase');
 const tablename = 'vehicle';
 const platePattern = /[A-Z]{3}[0-9][0-9A-Z][0-9]{2}/;
 
-const DriverController = {
+const VehicleController = {
   queryManager (filters) {
     let query = supabase.from(tablename)
     .select('*');
@@ -208,4 +208,4 @@ const DriverController = {
   }
 }
 
-module.exports = DriverController;
+module.exports = VehicleController;
