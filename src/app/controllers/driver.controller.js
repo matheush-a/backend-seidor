@@ -9,7 +9,7 @@ const DriverController = {
     }
 
     return supabase.from(tablename)
-      .select('*').like('name', `%${filters.name}%`);
+      .select('*').ilike('name', `%${filters.name}%`);
   },
 
   /**
@@ -48,7 +48,7 @@ const DriverController = {
   },
 
   /**
-   * Indexes every driver
+   * Indexes every drivers
    * @param {*} req 
    * @param {*} res 
    */

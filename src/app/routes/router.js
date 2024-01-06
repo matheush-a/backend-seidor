@@ -23,6 +23,21 @@ router.post('/drivers', async (req, res) => {
 });
 
 // Vehicles
+router.delete('/vehicles', async (req, res) => {
+  VehicleController.destroy(req, res);
+});
+router.get('/vehicles', async (req, res) => {
+  VehicleController.index(req, res);
+});
+router.get('/vehicles/getOne', async (req, res) => {
+  VehicleController.show(req, res);
+});
+router.patch('/vehicles', async (req, res) => {
+  VehicleController.update(req, res);
+});
+router.post('/vehicles', async (req, res) => {
+  VehicleController.store(req, res);
+});
 
 // Vehicles used by drivers
 
