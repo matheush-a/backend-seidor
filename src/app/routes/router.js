@@ -40,5 +40,14 @@ router.post('/vehicles', async (req, res) => {
 });
 
 // Vehicles used by drivers
+router.get('/vehicle_driver', async (req, res) => {
+  VehicleDriverController.index(req, res);
+});
+router.patch('/vehicle_driver', async (req, res) => {
+  VehicleDriverController.update(req, res);
+});
+router.post('/vehicle_driver', async (req, res) => {
+  VehicleDriverController.store(req, res);
+});
 
 module.exports = router;
