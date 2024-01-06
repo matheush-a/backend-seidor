@@ -2,6 +2,20 @@ const supabase = require('../database/supabase');
 const tablename = 'driver';
 
 const DriverController = {
+  async validator(req, res) {
+    const { id, name } = req.body;
+    const errors = [];
+
+    if (!id || isNaN(id)) {
+      errors.push("You must inform a valid driver's id.");
+    }
+    if (!name) {
+      errors.push("You must inform a driver's name.");
+    }
+
+    return errors;
+  },
+
   queryManager (filters) {
     if (!filters.name) {
       return supabase.from(tablename)
@@ -20,8 +34,8 @@ const DriverController = {
   async destroy (req, res) {
     const { id } = req.body;
 
-    if (!id) {
-      return res.status(422).json({ error: "You must inform a driver's id." });
+    if (!id || isNaN(id)) {
+      return res.status(422).json({ error: "You must inform a valid driver's id." });
     }
 
     try {
@@ -77,8 +91,8 @@ const DriverController = {
   async show (req, res) {
     const { id } = req.query;
 
-    if (!id) {
-      return res.status(422).json({ error: "You must inform a driver's id." });
+    if (!id || isNaN(id)) {
+      return res.status(422).json({ error: "You must inform a valid driver's id." });
     }
 
     try {
@@ -133,15 +147,13 @@ const DriverController = {
    * @returns 
    */
   async update (req, res) {
+    const errors = await this.validator(req, res);
+
+    if (errors.length) {
+      return res.status(422).json({ errors });
+    }
+
     const { id, name } = req.body;
-
-    if (!id) {
-      return res.status(422).json({ error: "You must inform a driver's id." });
-    }
-
-    if (!name) {
-      return res.status(422).json({ error: "You must inform a driver's name." });
-    }
 
     try {
       const { data } = await supabase.from(tablename)

@@ -3,6 +3,35 @@ const tablename = 'vehicle';
 const platePattern = /[A-Z]{3}[0-9][0-9A-Z][0-9]{2}/;
 
 const VehicleController = {
+  async validator(req, res, method) {
+    const { id, brand, color, plate } = req.body;
+    const errors = [];
+
+    if (method === 'post') {
+      if (!brand) {
+        errors.push("You must inform a vehicle's brand." );
+      }
+      if (!color) {
+        errors.push("You must inform a vehicle's color.");
+      }
+      if (!plate) {
+        errors.push("You must inform a vehicle's plate.");
+      }
+    }
+
+    if (plate && !platePattern.test(plate)) {
+      errors.push('Plate must respect one of these formats: XXX1111 or XXX1X11.');
+    }
+
+    if (method === 'patch') {
+      if (!id || isNaN(id)) {
+        errors.push("You must inform a valid vehicle's id.");
+      }
+    }
+
+    return errors;
+  },
+
   queryManager (filters) {
     let query = supabase.from(tablename)
     .select('*');
@@ -114,21 +143,13 @@ const VehicleController = {
    * @returns 
    */
   async store (req, res) {
-    const { brand, color, plate } = req.body;
+    const errors = await this.validator(req, res, 'post');
 
-    if (!brand) {
-      return res.status(422).json({ error: "You must inform a vehicle's brand." });
-    }
-    if (!color) {
-      return res.status(422).json({ error: "You must inform a vehicle's color." });
-    }
-    if (!plate) {
-      return res.status(422).json({ error: "You must inform a vehicle's plate." });
+    if (errors.length) {
+      return res.status(422).json({ errors });
     }
 
-    if (!platePattern.test(plate)) {
-      return res.status(422).json({ error: 'Plate must respect one of these formats: XXX1111 or XXX1X11.' });
-    }
+    const { plate } = req.body;
 
     try {
       if (plate) {
@@ -161,15 +182,13 @@ const VehicleController = {
    * @returns 
    */
   async update (req, res) {
+    const errors = await this.validator(req, res, 'patch');
+
+    if (errors.length) {
+      return res.status(422).json({ errors });
+    }
+
     const { id, brand, color, plate } = req.body;
-
-    if (!id) {
-      return res.status(422).json({ error: "You must inform a vehicle's id." });
-    }
-
-    if (plate && !platePattern.test(plate)) {
-      return res.status(422).json({ error: 'Plate must respect one of these formats: XXX1111 or XXX1X11.' });
-    }
 
     try {
       const { data } = await supabase.from(tablename)

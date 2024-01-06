@@ -2,6 +2,40 @@ const supabase = require('../database/supabase');
 const tablename = 'vehicle_driver';
 
 const VehicleDriverController = {
+  async validator(req, res, method) {
+    const { id, driver_id, vehicle_id, start_date, reason, due_date } = req.body;
+    const errors = [];
+
+    if (method === 'post') {
+      if (!driver_id || isNaN(driver_id)) {
+        errors.push('You must inform a valid driver_id.');
+      }
+      if (!vehicle_id || isNaN(driver_id)) {
+        errors.push('You must inform a valid vehicle_id.');
+      }
+      if (!start_date || !Date.parse(start_date)) {
+        errors.push('You must inform a valid start_date.');
+      }
+      if (!reason) {
+        errors.push('You must inform a reason.');
+      }
+    }
+
+    if (method === 'patch') {
+      if (!id || isNaN(id)) {
+        errors.push("You must inform a valid vehicle's id.");
+      }
+      if (!due_date || !Date.parse(due_date)) {
+        errors.push('You must inform a valid due_date.');
+      }
+      if (Date.parse(due_date) > Date.now()) {
+        errors.push('due_date must be shorter or equal than current date.');
+      }
+    }
+
+    return errors;
+  },
+
   /**
    * Indexes every vehicle_driver history
    * @param {*} req 
@@ -39,20 +73,13 @@ const VehicleDriverController = {
    * @returns 
    */
   async store (req, res) {
-    const { driver_id, vehicle_id, start_date, reason } = req.body;
+    const errors = await this.validator(req, res, 'post');
 
-    if (!driver_id) {
-      return res.status(422).json({ error: "You must inform a valid driver_id." });
+    if (errors.length) {
+      return res.status(422).json({ errors });
     }
-    if (!vehicle_id) {
-      return res.status(422).json({ error: "You must inform a valid vehicle_id." });
-    }
-    if (!start_date || !Date.parse(start_date)) {
-      return res.status(422).json({ error: "You must inform a valid start_date." });
-    }
-    if (!reason) {
-      return res.status(422).json({ error: "You must inform a reason" });
-    }
+
+    const { driver_id, vehicle_id } = req.body;
 
     try {
       let { data } = await supabase.from(tablename)
@@ -100,15 +127,13 @@ const VehicleDriverController = {
    * @returns 
    */
   async update (req, res) {
+    const errors = await this.validator(req, res, 'patch');
+
+    if (errors.length) {
+      return res.status(422).json({ errors });
+    }
+
     const { id, due_date } = req.body;
-
-    if (!id) {
-      return res.status(422).json({ error: "You must inform a vehicle's id." });
-    }
-
-    if (!due_date || !Date.parse(due_date)) {
-      return res.status(422).json({ error: 'You must inform a valid due_date.' });
-    }
 
     try {
       const { data } = await supabase.from(tablename)
@@ -116,10 +141,6 @@ const VehicleDriverController = {
 
       if (!data || !data.length) {
         return res.status(404).json({ message: 'Register not found by id, unable to update.'});
-      }
-
-      if (Date.parse(due_date) > Date.now()) {
-        return res.status(422).json({ error: 'Caution: due_date must be shorter or equal than current date.' });
       }
 
       if (Date.parse(data[0].start_date) > Date.parse(due_date)) {
