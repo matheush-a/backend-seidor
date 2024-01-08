@@ -12,7 +12,7 @@ Antes de executar o projeto, certifique-se de ter instalado:
 1. Clone o repositório:
 
 ```bash
-git https://github.com/matheush-a/backend-seidor.git
+git clone https://github.com/matheush-a/backend-seidor.git
 ```
 2. Instale as dependências
 ```bash
